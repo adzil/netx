@@ -4,7 +4,36 @@
 
 package netx
 
-import "syscall"
+import (
+	"context"
+	"net"
+	"syscall"
+)
+
+// Internal port reusable feature status.
+var isPortReusable bool
+
+func init() {
+	// Test whether port reuse feature is available or not.
+	listenConfig := net.ListenConfig{Control: ControlFunc}
+	conn, err := listenConfig.ListenPacket(context.Background(), "udp", "")
+	if err != nil {
+		return
+	}
+	// Create new listener on the same local address.
+	nconn, err := listenConfig.ListenPacket(context.Background(), "udp", conn.LocalAddr().String())
+	conn.Close()
+	if err != nil {
+		return
+	}
+	nconn.Close()
+	isPortReusable = true
+}
+
+// IsPortReusable checks whether port reuse feature is available or not.
+func IsPortReusable() bool {
+	return isPortReusable
+}
 
 // ControlFunc is the default control function for netx to enable the port reuse
 // feature. It can be directly embedded to net.ListenConfig or net.Dialer.
