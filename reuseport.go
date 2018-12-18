@@ -13,14 +13,13 @@ import (
 // Internal port reusable feature status.
 var isPortReusable bool
 
+// Init function to test whether port reuse feature is available or not.
 func init() {
-	// Test whether port reuse feature is available or not.
-	listenConfig := net.ListenConfig{Control: ControlFunc}
+	listenConfig := net.ListenConfig{Control: ReusePort}
 	conn, err := listenConfig.ListenPacket(context.Background(), "udp", "")
 	if err != nil {
 		return
 	}
-	// Create new listener on the same local address.
 	nconn, err := listenConfig.ListenPacket(context.Background(), "udp", conn.LocalAddr().String())
 	conn.Close()
 	if err != nil {
@@ -35,15 +34,21 @@ func IsPortReusable() bool {
 	return isPortReusable
 }
 
-// ControlFunc is the default control function for netx to enable the port reuse
-// feature. It can be directly embedded to net.ListenConfig or net.Dialer.
-func ControlFunc(network, address string, c syscall.RawConn) error {
+// ReusePort used by netx to enable reuse port feature by default. It also can
+// be used on the Control field in net.ListenConfig or net.Dialer to create
+// custom ListenConfig or Dialer with reuse port capability.
+//
+//     lc := net.ListenConfig{Control: netx.ReusePort}
+//     listener, err := lc.Listen("tcp", ":3000")
+//
+// ReusePort only available on TCP and UDP connection.
+func ReusePort(network, address string, c syscall.RawConn) error {
 	// Only control TCP and UDP socket.
 	switch network {
 	case "tcp", "tcp4", "tcp6", "udp", "udp4", "udp6":
 	default:
 		return nil
 	}
-	// Call OS-specific function to enable port reuse.
-	return controlFunc(network, address, c)
+	// Call OS-specific implementation function.
+	return reusePort(network, address, c)
 }

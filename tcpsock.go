@@ -27,7 +27,7 @@ func DialTimeoutTCP(network, localAddress, address string, timeout time.Duration
 		}
 	}
 	// Use net.Dialer to Dial UDP.
-	dialer := net.Dialer{Control: ControlFunc, LocalAddr: localAddr, Timeout: timeout}
+	dialer := net.Dialer{Control: ReusePort, LocalAddr: localAddr, Timeout: timeout}
 	conn, err := dialer.DialContext(context.Background(), network, address)
 	if err != nil {
 		return nil, err
@@ -50,7 +50,7 @@ func ListenTCP(network, address string) (*net.TCPListener, error) {
 		return nil, &net.OpError{Op: "listen", Net: network, Err: net.UnknownNetworkError(network)}
 	}
 	// Use net.ListenConfig to listen TCP.
-	listenConfig := net.ListenConfig{Control: ControlFunc}
+	listenConfig := net.ListenConfig{Control: ReusePort}
 	conn, err := listenConfig.Listen(context.Background(), network, address)
 	if err != nil {
 		return nil, err

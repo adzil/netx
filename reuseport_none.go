@@ -11,7 +11,7 @@ import (
 	"syscall"
 )
 
-// controlFunc on unsupported OSes.
-func controlFunc(network, address string, c syscall.RawConn) error {
-	return errors.New("netx: port reuse feature is unavailable")
+// Disable reusePort on unsupported OS.
+func reusePort(network, address string, c syscall.RawConn) error {
+	return errors.New("netx: reuse port is unavailable")
 }

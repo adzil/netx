@@ -12,7 +12,12 @@ import (
 	"time"
 )
 
-// Listen announces on the local network address with port reuse enabled.
+// Avoid leaking underlying connection to external package.
+type (
+	udpConn = net.UDPConn
+)
+
+// Listen announces on the local network address with reuse port enabled.
 //
 // The network must be "tcp", "tcp4", or "tcp6".
 //
@@ -21,7 +26,7 @@ func Listen(network, address string) (net.Listener, error) {
 	return ListenTCP(network, address)
 }
 
-// ListenPacket announces on the local network address with port reuse enabled.
+// ListenPacket announces on the local network address with reuse port enabled.
 //
 // The network must be "udp", "udp4", or "udp6".
 //
@@ -32,12 +37,7 @@ func ListenPacket(network, address string) (net.PacketConn, error) {
 
 // DialTimeout acts like Dial but takes a timeout.
 //
-// The timeout includes name resolution, if required. When using TCP, and the
-// host in the address parameter resolves to multiple IP addresses, the timeout
-// is spread over each consecutive dial, such that each is given an appropriate
-// fraction of the time to connect.
-//
-// See func net.Dial for a description of the network and address parameters.
+// See func Dial and net.DialTimeout for further details.
 func DialTimeout(network, localAddress, address string, timeout time.Duration) (net.Conn, error) {
 	switch network {
 	case "tcp", "tcp4", "tcp6":
@@ -48,7 +48,7 @@ func DialTimeout(network, localAddress, address string, timeout time.Duration) (
 	return nil, &net.OpError{Op: "listen", Net: network, Err: net.UnknownNetworkError(network)}
 }
 
-// Dial connects to the address on the named network with port reuse enabled.
+// Dial connects to the address on the named network with reuse port enabled.
 //
 // The network must be "tcp", "tcp4", "tcp6", "udp", "udp4", or "udp6".
 //

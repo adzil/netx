@@ -8,9 +8,9 @@ import (
 	"syscall"
 )
 
-// controlFunc enables port reuse feature on Windows.
-func controlFunc(network, address string, c syscall.RawConn) (err error) {
-	// Enable SO_REUSEADDR bit.
+// reusePort enables reuse port on Windows.
+func reusePort(network, address string, c syscall.RawConn) (err error) {
+	// SO_REUSEADDR option is equivalent to SO_REUSEPORT in Unix.
 	if ctrlErr := c.Control(func(fd uintptr) {
 		if err = syscall.SetsockoptInt(syscall.Handle(fd), syscall.SOL_SOCKET, syscall.SO_REUSEADDR, 1); err != nil {
 			return

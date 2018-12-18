@@ -12,9 +12,9 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-// controlFunc enables port reuse feature on Unix OSes.
-func controlFunc(network, address string, c syscall.RawConn) (err error) {
-	// Enable SO_REUSEPORT bit.
+// reusePort enables reuse port on Unix.
+func reusePort(network, address string, c syscall.RawConn) (err error) {
+	// Enable SO_REUSEPORT on socket.
 	if ctrlErr := c.Control(func(fd uintptr) {
 		if err = syscall.SetsockoptInt(int(fd), syscall.SOL_SOCKET, unix.SO_REUSEPORT, 1); err != nil {
 			return
