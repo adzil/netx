@@ -30,23 +30,6 @@ func ListenPacket(network, address string) (net.PacketConn, error) {
 	return ListenUDP(network, address)
 }
 
-// Dial connects to the address on the named network with port reuse enabled.
-//
-// The network must be "tcp", "tcp4", "tcp6", "udp", "udp4", or "udp6".
-//
-// If localAddress is empty, a local address is automatically chosen.
-//
-// See func net.Dial for a description of the network and address parameters.
-func Dial(network, localAddress, address string) (net.Conn, error) {
-	switch network {
-	case "tcp", "tcp4", "tcp6":
-		return DialTCP(network, localAddress, address)
-	case "udp", "udp4", "udp6":
-		return DialUDP(network, localAddress, address)
-	}
-	return nil, &net.OpError{Op: "listen", Net: network, Err: net.UnknownNetworkError(network)}
-}
-
 // DialTimeout acts like Dial but takes a timeout.
 //
 // The timeout includes name resolution, if required. When using TCP, and the
@@ -63,4 +46,15 @@ func DialTimeout(network, localAddress, address string, timeout time.Duration) (
 		return DialTimeoutUDP(network, localAddress, address, timeout)
 	}
 	return nil, &net.OpError{Op: "listen", Net: network, Err: net.UnknownNetworkError(network)}
+}
+
+// Dial connects to the address on the named network with port reuse enabled.
+//
+// The network must be "tcp", "tcp4", "tcp6", "udp", "udp4", or "udp6".
+//
+// If localAddress is empty, a local address is automatically chosen.
+//
+// See func net.Dial for a description of the network and address parameters.
+func Dial(network, localAddress, address string) (net.Conn, error) {
+	return DialTimeout(network, localAddress, address, 0)
 }
