@@ -57,8 +57,10 @@ func DialTimeoutUDP(network, laddr, raddr string, timeout time.Duration) (*net.U
 }
 
 // DialUDP acts like Dial for UDP networks.
-func DialUDP(network, localAddress, address string) (*net.UDPConn, error) {
-	return DialTimeoutUDP(network, localAddress, address, 0)
+//
+// If laddr is empty, a local address is automatically chosen.
+func DialUDP(network, laddr, raddr string) (*net.UDPConn, error) {
+	return DialTimeoutUDP(network, laddr, raddr, 0)
 }
 
 // ListenUDP acts like Listen for UDP networks.
