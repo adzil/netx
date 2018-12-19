@@ -11,7 +11,7 @@ import (
 )
 
 // DialTimeoutTCP acts like DialTCP but takes a timeout.
-func DialTimeoutTCP(network, localAddress, address string, timeout time.Duration) (*net.TCPConn, error) {
+func DialTimeoutTCP(network, laddr, raddr string, timeout time.Duration) (*net.TCPConn, error) {
 	// Filter for TCP network only.
 	switch network {
 	case "tcp", "tcp4", "tcp6":
@@ -20,25 +20,27 @@ func DialTimeoutTCP(network, localAddress, address string, timeout time.Duration
 	}
 	// Resolve local address if defined.
 	var localAddr net.Addr
-	if len(localAddress) > 0 {
+	if len(laddr) > 0 {
 		var err error
-		if localAddr, err = net.ResolveTCPAddr(network, localAddress); err != nil {
+		if localAddr, err = net.ResolveTCPAddr(network, laddr); err != nil {
 			return nil, err
 		}
 	}
-	// Use net.Dialer to Dial UDP.
+	// Use net.Dialer to Dial TCP.
 	dialer := net.Dialer{Control: ReusePort, LocalAddr: localAddr, Timeout: timeout}
-	conn, err := dialer.DialContext(context.Background(), network, address)
+	conn, err := dialer.DialContext(context.Background(), network, raddr)
 	if err != nil {
 		return nil, err
 	}
-	// Return UDP connection.
+	// Return TCP connection.
 	return conn.(*net.TCPConn), nil
 }
 
 // DialTCP acts like Dial for TCP networks.
-func DialTCP(network, localAddress, address string) (*net.TCPConn, error) {
-	return DialTimeoutTCP(network, localAddress, address, 0)
+//
+// If laddr is empty, a local address is automatically chosen.
+func DialTCP(network, laddr, raddr string) (*net.TCPConn, error) {
+	return DialTimeoutTCP(network, laddr, raddr, 0)
 }
 
 // ListenTCP acts like Listen for TCP networks.

@@ -31,7 +31,7 @@ func (u *UDPConn) Close() error {
 }
 
 // DialTimeoutUDP acts like DialUDP but takes a timeout.
-func DialTimeoutUDP(network, localAddress, address string, timeout time.Duration) (*net.UDPConn, error) {
+func DialTimeoutUDP(network, laddr, raddr string, timeout time.Duration) (*net.UDPConn, error) {
 	// Filter for UDP network only.
 	switch network {
 	case "udp", "udp4", "udp6":
@@ -40,15 +40,15 @@ func DialTimeoutUDP(network, localAddress, address string, timeout time.Duration
 	}
 	// Resolve local address if defined.
 	var localAddr net.Addr
-	if len(localAddress) > 0 {
+	if len(laddr) > 0 {
 		var err error
-		if localAddr, err = net.ResolveUDPAddr(network, localAddress); err != nil {
+		if localAddr, err = net.ResolveUDPAddr(network, laddr); err != nil {
 			return nil, err
 		}
 	}
 	// Use net.Dialer to Dial UDP.
 	dialer := net.Dialer{Control: ReusePort, LocalAddr: localAddr, Timeout: timeout}
-	conn, err := dialer.DialContext(context.Background(), network, address)
+	conn, err := dialer.DialContext(context.Background(), network, raddr)
 	if err != nil {
 		return nil, err
 	}

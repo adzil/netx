@@ -17,6 +17,28 @@ type (
 	udpConn = net.UDPConn
 )
 
+// DialTimeout acts like Dial but takes a timeout.
+//
+// See func Dial and net.DialTimeout for further details.
+func DialTimeout(network, address string, timeout time.Duration) (net.Conn, error) {
+	switch network {
+	case "tcp", "tcp4", "tcp6":
+		return DialTimeoutTCP(network, "", address, timeout)
+	case "udp", "udp4", "udp6":
+		return DialTimeoutUDP(network, "", address, timeout)
+	}
+	return nil, &net.OpError{Op: "listen", Net: network, Err: net.UnknownNetworkError(network)}
+}
+
+// Dial connects to the address on the named network with reuse port enabled.
+//
+// The network must be "tcp", "tcp4", "tcp6", "udp", "udp4", or "udp6".
+//
+// See func net.Dial for a description of the network and address parameters.
+func Dial(network, address string) (net.Conn, error) {
+	return DialTimeout(network, address, 0)
+}
+
 // Listen announces on the local network address with reuse port enabled.
 //
 // The network must be "tcp", "tcp4", or "tcp6".
@@ -33,28 +55,4 @@ func Listen(network, address string) (net.Listener, error) {
 // See func net.Listen for further details.
 func ListenPacket(network, address string) (net.PacketConn, error) {
 	return ListenUDP(network, address)
-}
-
-// DialTimeout acts like Dial but takes a timeout.
-//
-// See func Dial and net.DialTimeout for further details.
-func DialTimeout(network, localAddress, address string, timeout time.Duration) (net.Conn, error) {
-	switch network {
-	case "tcp", "tcp4", "tcp6":
-		return DialTimeoutTCP(network, localAddress, address, timeout)
-	case "udp", "udp4", "udp6":
-		return DialTimeoutUDP(network, localAddress, address, timeout)
-	}
-	return nil, &net.OpError{Op: "listen", Net: network, Err: net.UnknownNetworkError(network)}
-}
-
-// Dial connects to the address on the named network with reuse port enabled.
-//
-// The network must be "tcp", "tcp4", "tcp6", "udp", "udp4", or "udp6".
-//
-// If localAddress is empty, a local address is automatically chosen.
-//
-// See func net.Dial for a description of the network and address parameters.
-func Dial(network, localAddress, address string) (net.Conn, error) {
-	return DialTimeout(network, localAddress, address, 0)
 }
